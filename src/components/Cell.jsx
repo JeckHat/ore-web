@@ -5,6 +5,7 @@ const Cell = memo(({ cell, onClick, status, isWinning, selectedPred }) => {
   let border = selectedPred? "border-blue-600" : "border-gray-700";
   let borderWinningDone = status === "done" && isWinning? "border-yellow-300 opacity-100" : status === "waiting"? "opacity-100" : "opacity-25";
   let labelColor = selectedPred? "text-blue-600" : "";
+  // console.log("cell", cell)
   return (
     <button
       onClick={onClick}
@@ -27,7 +28,8 @@ const Cell = memo(({ cell, onClick, status, isWinning, selectedPred }) => {
       </div>
 
       <div class="flex flex-col mt-auto ml-auto">
-        <span class="text-elements-highEmphasis ml-auto font-medium">{typeof cell.value === "number" ? cell.value.toFixed(4) : cell.value}</span>
+        <div class={`text-xs ${cell.percentage > (1/25 * 100)? "text-green-400" : "text-red-400"}`}>%{(cell.percentage).toFixed(2)}</div>
+        {/* <span class="text-elements-highEmphasis ml-auto font-medium">{typeof cell.value === "number" ? cell.value.toFixed(4) : cell.value}</span> */}
       </div>
     </button>
   );

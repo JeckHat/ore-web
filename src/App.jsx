@@ -21,6 +21,7 @@ const makeEmptyCells = () =>
     count: 0,
     value: "—",
     disabled: false,
+    percentage: 0
   }));
 
 export default function App() {
@@ -35,7 +36,9 @@ export default function App() {
   const [total, setTotal] = useState({
     win: 0,
     round: 1,
+    lostInArrow: 0,
   })
+  const [winningTiles, setWinningTiles] = useState([])
 
   // change this to your WS endpoint
   const WS_URL = "ws://localhost:3000/ws";
@@ -45,7 +48,7 @@ export default function App() {
     const next = makeEmptyCells();
     payload.cells.forEach((c) => {
       if (typeof c.index === "number" && c.index >= 0 && c.index < CELL_COUNT) {
-        next[c.index] = { index: c.index, label: c.label ?? `#${c.index + 1}`, count: c.count ?? 0, value: c.value ?? "—", disabled: !!c.disabled };
+        next[c.index] = { index: c.index, label: c.label ?? `#${c.index + 1}`, count: c.count ?? 0, value: c.value ?? "—", disabled: !!c.disabled, percentage: 0 };
       }
     });
     setCells(next);
@@ -80,6 +83,7 @@ export default function App() {
       }
   
       if (json.type === "init") {
+        // hitWinningTiles(json)
         applyInit(json);
       } else if (json.type === "update") {
         applyUpdate(json);
@@ -91,17 +95,27 @@ export default function App() {
           setStatus(json.status);
           console.log("Predictions:", json.preds);
         }
+        hitWinningTiles()
       } else if (json.type === "winning") {
         setStatus(json.status);
         setWinning(json.preds);
         console.log("Winning: ", json.preds[0]);
         setTotal({
+          lostInArrow: json.lost_in_arrow,
           win: json.total_win,
           round: json.total_round
         })
       } else if (json.type === "waiting") {
         console.log("Status: ", json.status);
         setStatus(json.status);
+      } else if (json.type === "snapshot") {
+        setStatus(json.status);
+        setTotal({
+          lostInArrow: json.lost_in_arrow,
+          win: json.total_win,
+          round: json.total_round === 0? 1 : json.total_round
+        })
+        setPreds(json.preds)
       } else {
         console.warn("Unhandled WS message:", json);
       }
@@ -148,6 +162,8 @@ export default function App() {
     }
 
     connect();
+    
+    hitWinningTiles()
 
     return () => {
       mounted = false;
@@ -165,45 +181,65 @@ export default function App() {
     ws.send(JSON.stringify({ type: "toggle", index }));
   };
 
+  const hitWinningTiles = async () => {
+    console.log("HIT hitWinningTiles")
+    const response = await fetch('/api/rounds/winning-tiles', {
+      method: 'GET',
+      credentials: 'include'
+    })
+    const resData = await response.json()
+    setWinningTiles(resData.tiles)
+    // applyInit(json, resData.tiles);
+  }
+
   return (
-    <div class="flex flex-col gap-4 w-full">
-      <div class="mx-auto w-full max-w-[900px]">
-        <div class="flex items-center justify-between mb-2">
-          <h2 class="text-lg font-semibold">ORE Predictions</h2>
-          <div>
-            <div class="text-sm text-gray-300">{connected ? "Connected" : "Disconnected"}</div>
-            <div class="text-sm text-gray-300">Round: {round}</div>
+    <div class="flex flex-col gap-4 lg:flex-row lg:justify-between xl:gap-8 w-full px-4 xl:px-8">
+      <div class="flex flex-col gap-4 max-w-160 mx-auto pt-4 w-full">
+        <div class="mx-auto w-full">
+          <div class="flex items-center justify-between mb-2">
+            <h2 class="text-lg font-semibold">ORE Predictions</h2>
+            <div>
+              <div class="text-sm text-gray-300">{connected ? "Connected" : "Disconnected"}</div>
+              <div class="text-sm text-gray-300">Round: {round}</div>
+            </div>
+          </div>
+          {status === "done" && <div class="flex items-center justify-center mb-3">
+            {preds.includes(winning[0]) && <h2 class="text-lg font-semibold text-yellow-300">✅ CORRECT</h2>}
+            {!preds.includes(winning[0]) && <h2 class="text-lg font-semibold text-red-600">❌ INCORRECT</h2>}
+          </div>}
+          <div class="mx-auto w-full grid grid-cols-5 grid-rows-5 gap-2 mb-4">
+            {cells.map((cell) => {
+              const isPredicted = preds.includes(cell.index);
+              const isWinning = winning.includes(cell.index);
+              return (
+                <Cell
+                  key={cell.index}
+                  cell={{
+                    ...cell,
+                    percentage: winningTiles.length > 0? winningTiles[cell.index].percentage : 0
+                  }}
+                  status={status}
+                  isWinning={isWinning}
+                  selectedPred={isPredicted}
+                  // className={isPredicted ? "border border-yellow-300" : ""}
+                  onClick={() => {
+                    if (!cell.disabled) sendToggle(cell.index);
+                  }}
+                />
+              );
+            })}
+          </div>
+          <div class="flex items-center justify-between mb-2">
+          <div class="text-sm text-gray-300">Total Round: {total.win}/{total.round}</div>
+            <div>
+              <div class="text-sm text-gray-300">Win Rate: {(total.win/total.round * 100).toFixed(2)}%</div>
+              <div class="text-sm text-gray-300">Lost in arrow: {total.lostInArrow}</div>
+            </div>
           </div>
         </div>
-        {status === "done" && <div class="flex items-center justify-center mb-3">
-          {preds.includes(winning[0]) && <h2 class="text-lg font-semibold text-yellow-300">✅ CORRECT</h2>}
-          {!preds.includes(winning[0]) && <h2 class="text-lg font-semibold text-red-600">❌ INCORRECT</h2>}
-        </div>}
-        <div class="mx-auto w-full grid grid-cols-5 grid-rows-5 gap-2 mb-4">
-          {cells.map((cell) => {
-            const isPredicted = preds.includes(cell.index);
-            const isWinning = winning.includes(cell.index);
-            return (
-              <Cell
-                key={cell.index}
-                cell={cell}
-                status={status}
-                isWinning={isWinning}
-                selectedPred={isPredicted}
-                // className={isPredicted ? "border border-yellow-300" : ""}
-                onClick={() => {
-                  if (!cell.disabled) sendToggle(cell.index);
-                }}
-              />
-            );
-          })}
-        </div>
-        <div class="flex items-center justify-between mb-2">
-        <div class="text-sm text-gray-300">Total Round: {total.win}/{total.round}</div>
-          <div>
-            <div class="text-sm text-gray-300">Win Rate: {(total.win/total.round * 100).toFixed(2)}%</div>
-          </div>
-        </div>
+      </div>
+      <div class="flex flex-col gap-8 max-w-160 lg:max-w-128 w-full mx-auto pb-4 pt-4 xl:pt-8 pb-48 md:pb-24 lg:pb-16">
+      <div class="text-sm text-gray-300">Win Rate: {(total.win/total.round * 100).toFixed(2)}%</div>
       </div>
     </div>
   );
