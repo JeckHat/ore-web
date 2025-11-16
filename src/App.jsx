@@ -230,7 +230,10 @@ export default function App() {
             })}
           </div>
           <div class="flex items-center justify-between mb-2">
-          <div class="text-sm text-gray-300">Total Round: {total.win}/{total.round}</div>
+            <div>
+              <div class="text-sm text-gray-300">Total Round: {total.win}/{total.round}</div>
+              <div class="text-sm text-gray-300">Diff: {total.round - total.win}</div>
+            </div>
             <div>
               <div class="text-sm text-gray-300">Win Rate: {(total.win/total.round * 100).toFixed(2)}%</div>
               <div class="text-sm text-gray-300">Lost in arrow: {total.lostInArrow}</div>
