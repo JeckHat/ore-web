@@ -3,7 +3,7 @@ import { memo } from "preact/compat";
 const Cell = memo(({ cell, onClick, status, isWinning, selectedPred }) => {
   const disabled = !!cell.disabled;
   let border = selectedPred? "border-blue-600" : "border-gray-700";
-  let borderWinningDone = status === "done" && isWinning? "border-yellow-300 opacity-100" : status === "waiting"? "opacity-100" : "opacity-25";
+  let borderWinningDone = status === "result" && isWinning? "border-yellow-300 opacity-100" : status === "predicting"? "opacity-100" : "opacity-25";
   let labelColor = selectedPred? "text-blue-600" : "";
   // console.log("cell", cell)
   return (
