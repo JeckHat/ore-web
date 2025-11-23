@@ -72,7 +72,8 @@ export default function App() {
   const [winningTiles, setWinningTiles] = useState([])
 
   // change this to your WS endpoint
-  const WS_URL = "ws://localhost:3000/ws";
+  const WS_URL = "wss://pool.ore-track.com/ws";
+  const WS_URL_2 = "wss://pool2.ore-track.com/ws";
 
   const applyInit = useCallback((payload) => {
     if (!payload.cells) return;
@@ -145,32 +146,66 @@ export default function App() {
         console.log("Status: ", json.status);
         setStatus(json.status);
       } else if (json.type === "snapshot") {
-        setSnapshot({
-          oreSnapshot: {
-            status: json.ore_snapshot.status,
-            round: json.ore_snapshot.round,
-            preds: json.ore_snapshot.preds,
-            totalRound: json.ore_snapshot.total_round,
-            totalWin: json.ore_snapshot.total_win,
-            win: json.ore_snapshot.win,
-            lose: json.ore_snapshot.lose,
-            winInRow: json.ore_snapshot.win_in_row,
-            lostInRow: json.ore_snapshot.lose_in_row,
-            winningSquare: json.ore_snapshot.winning_square
-          },
-          orbSnapshot: {
-            status: json.orb_snapshot.status,
-            round: json.orb_snapshot.round,
-            preds: json.orb_snapshot.preds,
-            totalRound: json.orb_snapshot.total_round,
-            totalWin: json.orb_snapshot.total_win,
-            win: json.orb_snapshot.win,
-            lose: json.orb_snapshot.lose,
-            winInRow: json.orb_snapshot.win_in_row,
-            lostInRow: json.orb_snapshot.lose_in_row,
-            winningSquare: json.orb_snapshot.winning_square
-          }
-        })
+        if (json.rng_type === "multiple") {
+          setSnapshot({
+            oreSnapshot: {
+              status: json.ore_snapshot.status,
+              round: json.ore_snapshot.round,
+              preds: json.ore_snapshot.preds,
+              totalRound: json.ore_snapshot.total_round,
+              totalWin: json.ore_snapshot.total_win,
+              win: json.ore_snapshot.win,
+              lose: json.ore_snapshot.lose,
+              winInRow: json.ore_snapshot.win_in_row,
+              lostInRow: json.ore_snapshot.lose_in_row,
+              winningSquare: json.ore_snapshot.winning_square
+            },
+            orbSnapshot: {
+              status: json.orb_snapshot.status,
+              round: json.orb_snapshot.round,
+              preds: json.orb_snapshot.preds,
+              totalRound: json.orb_snapshot.total_round,
+              totalWin: json.orb_snapshot.total_win,
+              win: json.orb_snapshot.win,
+              lose: json.orb_snapshot.lose,
+              winInRow: json.orb_snapshot.win_in_row,
+              lostInRow: json.orb_snapshot.lose_in_row,
+              winningSquare: json.orb_snapshot.winning_square
+            }
+          })
+        } else if (json.type === "ore") {
+          setSnapshot({
+            ...snapshot,
+            oreSnapshot: {
+              status: json.ore_snapshot.status,
+              round: json.ore_snapshot.round,
+              preds: json.ore_snapshot.preds,
+              totalRound: json.ore_snapshot.total_round,
+              totalWin: json.ore_snapshot.total_win,
+              win: json.ore_snapshot.win,
+              lose: json.ore_snapshot.lose,
+              winInRow: json.ore_snapshot.win_in_row,
+              lostInRow: json.ore_snapshot.lose_in_row,
+              winningSquare: json.ore_snapshot.winning_square
+            },
+          })
+        } else {
+          setSnapshot({
+            ...snapshot,
+            orbSnapshot: {
+              status: json.orb_snapshot.status,
+              round: json.orb_snapshot.round,
+              preds: json.orb_snapshot.preds,
+              totalRound: json.orb_snapshot.total_round,
+              totalWin: json.orb_snapshot.total_win,
+              win: json.orb_snapshot.win,
+              lose: json.orb_snapshot.lose,
+              winInRow: json.orb_snapshot.win_in_row,
+              lostInRow: json.orb_snapshot.lose_in_row,
+              winningSquare: json.orb_snapshot.winning_square
+            }
+          })
+        }
       } else {
         console.warn("Unhandled WS message:", json);
       }
@@ -181,8 +216,8 @@ export default function App() {
   console.log("snapshot", snapshot)
   useEffect(() => {
     let mounted = true;
-    function connect() {
-      const ws = new WebSocket(WS_URL);
+    function connect(wsUrl) {
+      const ws = new WebSocket(wsUrl);
       wsRef.current = ws;
 
       ws.addEventListener("open", () => {
@@ -217,7 +252,8 @@ export default function App() {
       });
     }
 
-    connect();
+    connect(WS_URL);
+    connect(WS_URL_2);
     
     // hitWinningTiles()
 
