@@ -1,6 +1,16 @@
 // src/main.jsx
-import { render } from "preact";
-import App from "./App"; // pastikan App adalah default export
+import { render, h } from "preact";
+import Router from "preact-router";
+import App from "./App";
+import Ore from "./Ore";
+import Orb from "./Orb";
 import './index.css'; 
 
-render(<App />, document.getElementById("app"));
+render(
+    <Router>
+        <App path="/" />
+        <Ore path="/ore" />
+        <Orb path="/orb" />
+    </Router>,
+    document.getElementById("app")
+);
