@@ -29,6 +29,7 @@ export default function Ore() {
     lostInRow: 0,
     winningSquare: 0
   })
+  const [lostInRow, setLostInRow] = useState({});
   const wsRef = useRef(null);
   const backoffRef = useRef(1000);
   const [winningTiles, setWinningTiles] = useState([])
@@ -82,6 +83,9 @@ export default function Ore() {
         applyInit(json);
       } else if (json.type === "update") {
         applyUpdate(json);
+      } else if (json.type === "lost_in_row") {
+        console.log("list_lose_in_row", json.list_lose_in_row)
+        setLostInRow(json.list_lose_in_row);
       } else if (json.type === "snapshot") {
         if (json.rng_type === "ore") {
             setSnapshot({
@@ -210,24 +214,28 @@ export default function Ore() {
               );
             })}
           </div>
-          <div class="flex items-center justify-between mb-2">
-            <div>
-              <div class="text-sm text-gray-300">Total Round: {snapshot.totalWin}/{snapshot.totalRound}</div>
-              <div class="text-sm text-gray-300">Diff: {snapshot.totalRound - snapshot.totalWin}</div>
-            </div>
-          </div>
         </div>
       </div>
       <div class="flex flex-col gap-8 max-w-160 lg:max-w-128 w-full mx-auto pb-4 pt-4 xl:pt-8 pb-48 md:pb-24 lg:pb-16">
         <div class="text-sm text-gray-300">Win Rate: {(snapshot.totalWin/snapshot.totalRound * 100).toFixed(2)}%</div>
         {snapshot.win > 0 ? <h2 class="text-lg font-semibold text-yellow-300">LAST: ✅ CORRECT</h2> : <h2 class="text-lg font-semibold text-yellow-300">LAST: ❌ INCORRECT</h2>}
         <div>
+          <div class="text-sm text-gray-300">Total Round: {snapshot.totalWin}/{snapshot.totalRound} ({snapshot.totalRound - snapshot.totalWin})</div>
           <div class="text-sm text-gray-300">Win Rate: {(snapshot.totalWin/snapshot.totalRound * 100).toFixed(2)}%</div>
-          <div class="text-sm text-gray-300">Win in arrow: {snapshot.winInRow}</div>
-          <div class="text-sm text-gray-300">Lost in arrow: {snapshot.lostInRow}</div>
           <br/>
-          <div class="text-sm text-gray-300">Current Win in arrow: {snapshot.win}</div>
-          <div class="text-sm text-gray-300">Current Lost in arrow: {snapshot.lose}</div>
+          <div class="text-sm text-gray-300">Win in a row: {snapshot.winInRow}</div>
+          <div class="text-sm text-gray-300">Lost in a row: {snapshot.lostInRow}</div>
+          <br/>
+          <div class="text-sm text-gray-300">Current Win in a row: {snapshot.win}</div>
+          <div class="text-sm text-gray-300">Current Lost in a row: {snapshot.lose}</div>
+          <div class="mt-4">
+            <div>Lost in a row</div>
+            {Object.keys(lostInRow).map(data => (
+              <div key={`lost-in-row-${data}`}>
+                <div class="text-sm text-red-300">Lose {data}: {lostInRow[data]}</div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>

@@ -233,7 +233,9 @@ export default function Orb() {
         <div class="text-sm text-gray-300">Win Rate: {(snapshot.totalWin/snapshot.totalRound * 100).toFixed(2)}%</div>
         {snapshot.win > 0 ? <h2 class="text-lg font-semibold text-yellow-300">LAST: ✅ CORRECT</h2> : <h2 class="text-lg font-semibold text-yellow-300">LAST: ❌ INCORRECT</h2>}
         <div>
+          <div class="text-sm text-gray-300">Total Round: {snapshot.totalWin}/{snapshot.totalRound}</div>  
           <div class="text-sm text-gray-300">Win Rate: {(snapshot.totalWin/snapshot.totalRound * 100).toFixed(2)}%</div>
+          <br />
           <div class="text-sm text-gray-300">Win in arrow: {snapshot.winInRow}</div>
           <div class="text-sm text-gray-300">Lost in arrow: {snapshot.lostInRow}</div>
           <br/>
