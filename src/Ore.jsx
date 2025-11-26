@@ -35,7 +35,7 @@ export default function Ore() {
   const [winningTiles, setWinningTiles] = useState([])
 
   // change this to your WS endpoint
-  const WS_URL = "ws://localhost:3000/ws";
+  const WS_URL = "wss://pool.ore-track.com/ws";
 
   const applyInit = useCallback((payload) => {
     if (!payload.cells) return;
