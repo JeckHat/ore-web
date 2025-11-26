@@ -35,7 +35,7 @@ export default function Ore() {
   const [winningTiles, setWinningTiles] = useState([])
 
   // change this to your WS endpoint
-  const WS_URL = "wss://pool.ore-track.com/ws";
+  const WS_URL = "ws://localhost:3000/ws";
 
   const applyInit = useCallback((payload) => {
     if (!payload.cells) return;
@@ -224,15 +224,15 @@ export default function Ore() {
           <div class="text-sm text-gray-300">Win Rate: {(snapshot.totalWin/snapshot.totalRound * 100).toFixed(2)}%</div>
           <br/>
           <div class="text-sm text-gray-300">Win in a row: {snapshot.winInRow}</div>
-          <div class="text-sm text-gray-300">Lost in a row: {snapshot.lostInRow}</div>
+          <div class="text-sm text-gray-300">Lose in a row: {snapshot.lostInRow}</div>
           <br/>
           <div class="text-sm text-gray-300">Current Win in a row: {snapshot.win}</div>
-          <div class="text-sm text-gray-300">Current Lost in a row: {snapshot.lose}</div>
+          <div class="text-sm text-gray-300">Current Lose in a row: {snapshot.lose}</div>
           <div class="mt-4">
-            <div>Lost in a row</div>
+            <div>Lose in a row</div>
             {Object.keys(lostInRow).map(data => (
               <div key={`lost-in-row-${data}`}>
-                <div class="text-sm text-red-300">Lose {data}: {lostInRow[data]}</div>
+                <div class="text-sm text-red-300">Lose in a row {data}: {lostInRow[data]}x</div>
               </div>
             ))}
           </div>

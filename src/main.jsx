@@ -8,7 +8,7 @@ import './index.css';
 
 render(
     <Router>
-        <App path="/" />
+        <Ore path="/" />
         <Ore path="/ore" />
         <Orb path="/orb" />
     </Router>,
