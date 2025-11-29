@@ -29,6 +29,7 @@ export default function Ore() {
     lostInRow: 0,
     winningSquare: 0
   })
+  const [winInRow, setWinInRow] = useState({});
   const [lostInRow, setLostInRow] = useState({});
   const wsRef = useRef(null);
   const backoffRef = useRef(1000);
@@ -83,9 +84,12 @@ export default function Ore() {
         applyInit(json);
       } else if (json.type === "update") {
         applyUpdate(json);
+      } else if (json.type === "win_in_row") {
+        console.log("list_in_row", json.list__in_row)
+        setWinInRow(json.list_in_row);
       } else if (json.type === "lost_in_row") {
-        console.log("list_lose_in_row", json.list_lose_in_row)
-        setLostInRow(json.list_lose_in_row);
+        console.log("list_in_row", json.list_in_row)
+        setLostInRow(json.list_in_row);
       } else if (json.type === "snapshot") {
         if (json.rng_type === "ore") {
             setSnapshot({
@@ -229,6 +233,14 @@ export default function Ore() {
           <div class="text-sm text-gray-300">Current Win in a row: {snapshot.win}</div>
           <div class="text-sm text-gray-300">Current Lose in a row: {snapshot.lose}</div>
           <div class="mt-4">
+            <div>Win in a row</div>
+            {Object.keys(winInRow).map(data => (
+              <div key={`win-in-row-${data}`}>
+                <div class="text-sm text-red-300">Win in a row {data}: {winInRow[data]}x</div>
+              </div>
+            ))}
+          </div>
+          <div class="mt-2">
             <div>Lose in a row</div>
             {Object.keys(lostInRow).map(data => (
               <div key={`lost-in-row-${data}`}>
